@@ -1,0 +1,28 @@
+name: worker_bot
+description: A simple worker bot that processes tasks sequentially
+version: "1.0"
+role: worker
+
+blueprint: bot.py
+
+deployment_config:
+  cpu_request: "0.5"
+  cpu_limit: "1.0"
+  memory_request: "256Mi"
+  memory_limit: "512Mi"
+  replicas: 1
+  restart_policy: always
+
+environment:
+  LOG_LEVEL: INFO
+  TASK_TIMEOUT: "300"
+  POLLING_INTERVAL: "5"
+
+tags:
+  - template
+  - worker
+  - task-processing
+
+annotations:
+  created_from: worker-bot-template
+  version: "1.0"

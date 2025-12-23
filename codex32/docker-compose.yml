@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: codex32-postgres
+    environment:
+      POSTGRES_USER: codex_user
+      POSTGRES_PASSWORD: codex_password
+      POSTGRES_DB: codex32
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codex_user -d codex32"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Self-Knowledge Base
+  redis:
+    image: redis:7-alpine
+    container_name: codex32-redis
+    command: redis-server --appendonly yes --requirepass redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Codex-32 API Server
+  codex32-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codex32-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://codex_user:codex_password@postgres:5432/codex32
+      REDIS_URL: redis://:redis_password@redis:6379/0
+      API_SECRET_KEY: dev-secret-key-change-in-production
+      ADMIN_API_KEY: dev-admin-key-change-in-production
+      DEBUG: "true"
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+      - ./main.py:/app/main.py
+      - ./logs:/app/logs
+      - ./bots:/app/bots
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codex-32 - Bot Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #3B82F6;
+            --secondary: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --border: #E5E7EB;
+            --text: #374151;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .logo span {
+            color: var(--secondary);
+        }
+        
+        header p {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* Buttons */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #059669;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+        
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        
+        /* Bot Creation Form */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        
+        .helper-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        /* Template Selector */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .template-card {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .template-card:hover {
+            border-color: var(--primary);
+            background: #F0F9FF;
+        }
+        
+        .template-card.selected {
+            border-color: var(--primary);
+            background: #EFF6FF;
+        }
+        
+        .template-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .template-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+        }
+        
+        /* Bots List */
+        .bots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .bot-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .bot-card:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .bot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .bot-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .bot-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-inactive {
+            background: #FEE2E2;
+            color: #7F1D1D;
+        }
+        
+        .bot-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .bot-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 8px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .bot-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .bot-actions button {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+        
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .modal-close:hover {
+            color: var(--text);
+        }
+        
+        /* Stats Dashboard */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-box-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .stat-box-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Activity Log */
+        .activity-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .activity-icon {
+            font-size: 24px;
+            min-width: 30px;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-actions {
+                margin-top: 15px;
+            }
+            
+            .template-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .bots-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div>
+                <div class="logo">Codex<span>-32</span></div>
+                <p>Intelligent Bot Management Dashboard</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-primary" onclick="openCreateBotModal()">+ Create Bot</button>
+                <button class="btn-secondary" onclick="refreshBots()">🔄 Refresh</button>
+            </div>
+        </header>
+        
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-box-value" id="total-bots">0</div>
+                <div class="stat-box-label">Total Bots</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value" id="active-bots">0</div>
+                <div class="stat-box-label">Active Bots</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value" id="tasks-processed">0</div>
+                <div class="stat-box-label">Tasks Processed</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-value" id="system-health">--</div>
+                <div class="stat-box-label">System Health</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Create Bot (Quick Form) -->
+            <div class="card">
+                <h2>🤖 Quick Bot Creation</h2>
+                <p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+                    Describe what you want your bot to do, and we'll create it automatically.
+                </p>
+                
+                <div class="form-group">
+                    <label>What should your bot do?</label>
+                    <textarea id="bot-description" placeholder="Example: Monitor database for new orders and send them to our fulfillment API every 5 seconds"></textarea>
+                    <div class="helper-text">Be descriptive! Tell us about frequency, data sources, and goals.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Bot Name (optional)</label>
+                    <input type="text" id="bot-name" placeholder="auto-filled from description">
+                </div>
+                
+                <div class="form-group">
+                    <label>Choose Template (Optional)</label>
+                    <div class="template-grid">
+                        <div class="template-card selected" onclick="selectTemplate(this, 'worker')">
+                            <div class="template-icon">⚙️</div>
+                            <div class="template-name">Worker</div>
+                        </div>
+                        <div class="template-card" onclick="selectTemplate(this, 'collector')">
+                            <div class="template-icon">📦</div>
+                            <div class="template-name">Collector</div>
+                        </div>
+                        <div class="template-card" onclick="selectTemplate(this, 'api')">
+                            <div class="template-icon">🌐</div>
+                            <div class="template-name">API</div>
+                        </div>
+                        <div class="template-card" onclick="selectTemplate(this, 'analyzer')">
+                            <div class="template-icon">📊</div>
+                            <div class="template-name">Analyzer</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" style="width: 100%; margin-top: 10px;" onclick="createBotFromDescription()">
+                    ✨ Create Bot (No Coding!)
+                </button>
+            </div>
+            
+            <!-- Your Bots -->
+            <div class="card">
+                <h2>🚀 Your Bots</h2>
+                <div id="bots-container" style="display: grid; gap: 15px; max-height: 600px; overflow-y: auto;">
+                    <p style="text-align: center; color: #999; padding: 40px 20px;">
+                        No bots yet. Create one to get started! →
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card">
+            <h2>📋 Recent Activity</h2>
+            <div id="activity-log">
+                <div class="activity-item">
+                    <div class="activity-icon">🟢</div>
+                    <div class="activity-content">
+                        <div class="activity-title">System Started</div>
+                        <div class="activity-time">Just now</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create Bot Modal -->
+    <div id="createBotModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Create a New Bot</div>
+            <span class="modal-close" onclick="closeCreateBotModal()">✕</span>
+            
+            <div class="form-group">
+                <label>Bot Description</label>
+                <textarea id="modal-description" placeholder="Describe what your bot should do..."></textarea>
+                <div class="helper-text">More detailed descriptions lead to better bots!</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Bot Name</label>
+                <input type="text" id="modal-bot-name" placeholder="my-awesome-bot">
+            </div>
+            
+            <div class="form-group">
+                <label>Complexity Level</label>
+                <select id="modal-complexity">
+                    <option value="simple">Simple (basic data processing)</option>
+                    <option value="moderate" selected>Moderate (databases, APIs)</option>
+                    <option value="advanced">Advanced (ML, complex logic)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>How Often Should It Run?</label>
+                <select id="modal-frequency">
+                    <option value="triggered">Triggered (on-demand)</option>
+                    <option value="scheduled" selected>Scheduled (regular intervals)</option>
+                    <option value="continuous">Continuous (24/7)</option>
+                    <option value="manual">Manual (user initiated)</option>
+                </select>
+            </div>
+            
+            <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="submitBotCreation()">
+                ✨ Create Bot Now
+            </button>
+            <button class="btn-secondary" style="width: 100%; margin-top: 10px;" onclick="closeCreateBotModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000/api/v1';
+        let selectedTemplate = 'worker';
+        
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadBots();
+            loadSystemStats();
+            setInterval(loadSystemStats, 5000); // Refresh every 5 seconds
+        });
+        
+        // Load bots from server
+        async function loadBots() {
+            try {
+                const response = await fetch(`${API_BASE}/bots`);
+                const data = await response.json();
+                displayBots(data.bots || []);
+            } catch (error) {
+                console.error('Error loading bots:', error);
+            }
+        }
+        
+        // Display bots in UI
+        function displayBots(bots) {
+            const container = document.getElementById('bots-container');
+            
+            if (bots.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px 20px;">No bots yet. Create one to get started! →</p>';
+                return;
+            }
+            
+            container.innerHTML = bots.map(bot => `
+                <div class="bot-card">
+                    <div class="bot-header">
+                        <div class="bot-name">${bot.name}</div>
+                        <div class="bot-status ${bot.status === 'active' ? 'status-active' : 'status-inactive'}">
+                            ${bot.status === 'active' ? '🟢 Active' : '⚫ Inactive'}
+                        </div>
+                    </div>
+                    <div class="bot-description">${bot.description || 'No description'}</div>
+                    <div class="bot-stats">
+                        <div class="stat">
+                            <div class="stat-value">${bot.processed || 0}</div>
+                            <div class="stat-label">Processed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${bot.errors || 0}</div>
+                            <div class="stat-label">Errors</div>
+                        </div>
+                    </div>
+                    <div class="bot-actions">
+                        <button class="btn-primary btn-small" onclick="startBot('${bot.id}')">Start</button>
+                        <button class="btn-secondary btn-small" onclick="viewBot('${bot.id}')">View</button>
+                        <button class="btn-small" style="background: var(--danger); color: white;" onclick="deleteBot('${bot.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update stats
+            document.getElementById('total-bots').textContent = bots.length;
+            document.getElementById('active-bots').textContent = bots.filter(b => b.status === 'active').length;
+        }
+        
+        // Load system stats
+        async function loadSystemStats() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                document.getElementById('system-health').textContent = data.status === 'healthy' ? '✅ Good' : '⚠️ Check';
+            } catch (error) {
+                document.getElementById('system-health').textContent = '⚠️ Error';
+            }
+        }
+        
+        // Create bot from description
+        async function createBotFromDescription() {
+            const description = document.getElementById('bot-description').value;
+            if (!description.trim()) {
+                alert('Please describe what your bot should do!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/bots/create-from-description`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        description,
+                        template: selectedTemplate
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(`✨ Bot "${result.bot_name}" created successfully!\nIt's ready to deploy.`);
+                    document.getElementById('bot-description').value = '';
+                    loadBots();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error creating bot:', error);
+                alert('Error creating bot. Check console for details.');
+            }
+        }
+        
+        // Template selection
+        function selectTemplate(element, template) {
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedTemplate = template;
+        }
+        
+        // Modal functions
+        function openCreateBotModal() {
+            document.getElementById('createBotModal').classList.add('active');
+        }
+        
+        function closeCreateBotModal() {
+            document.getElementById('createBotModal').classList.remove('active');
+        }
+        
+        async function submitBotCreation() {
+            const description = document.getElementById('modal-description').value;
+            if (!description.trim()) {
+                alert('Please provide a bot description!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/bots/create-from-description`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        description,
+                        name: document.getElementById('modal-bot-name').value,
+                        complexity: document.getElementById('modal-complexity').value,
+                        frequency: document.getElementById('modal-frequency').value
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert(`✨ Bot created! Ready to deploy.`);
+                    closeCreateBotModal();
+                    loadBots();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error creating bot: ' + error.message);
+            }
+        }
+        
+        // Bot actions
+        function startBot(botId) {
+            alert('Starting bot: ' + botId);
+            // TODO: Implement bot start
+        }
+        
+        function viewBot(botId) {
+            alert('Viewing bot: ' + botId);
+            // TODO: Implement bot details view
+        }
+        
+        function deleteBot(botId) {
+            if (confirm('Are you sure you want to delete this bot?')) {
+                alert('Deleting bot: ' + botId);
+                loadBots();
+            }
+        }
+        
+        function refreshBots() {
+            loadBots();
+            loadSystemStats();
+            alert('Refreshed!');
+        }
+    </script>
+</body>
+</html>
