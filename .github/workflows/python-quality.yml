@@ -1,0 +1,98 @@
+name: Python Code Quality & Testing
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pylint black isort pytest pytest-cov
+      
+      - name: Run Black formatting check
+        run: black --check .
+        continue-on-error: true
+      
+      - name: Run isort import check
+        run: isort --check-only .
+        continue-on-error: true
+      
+      - name: Run Flake8 linting
+        run: flake8 . --max-line-length=100 --extend-ignore=E203,W503
+        continue-on-error: true
+      
+      - name: Run Pylint
+        run: pylint **/*.py --max-line-length=100 --disable=C0111,C0103
+        continue-on-error: true
+      
+      - name: Run tests with coverage
+        run: pytest --cov --cov-report=xml
+        continue-on-error: true
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+        continue-on-error: true
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install security tools
+        run: pip install bandit safety
+      
+      - name: Run Bandit security scan
+        run: bandit -r . --json -o bandit-report.json || true
+      
+      - name: Check dependencies with Safety
+        run: safety check --json || true
+
+  performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install analysis tools
+        run: pip install radon
+      
+      - name: Analyze code complexity
+        run: |
+          radon cc . -a -j > complexity-report.json || true
+          radon mi . -j > maintainability-report.json || true
+          echo "Complexity Report:"
+          radon cc . -a
