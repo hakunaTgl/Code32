@@ -116,25 +116,7 @@ Press Ctrl+C at any time to cancel.
             return False, "Version must be in format: 1.0 or 1.0.0"
         return True, ""
 
-    def validate_db_url(self, url: str) -> Tuple[bool, str]:
-        """Validate application name (no command-like strings)."""
-        # Reject command-like strings and shell metacharacters
-        forbidden = ['make', 'sudo', '&&', '||', ';', '|', '#', '`', '$', '\\']
-        for char in forbidden:
-            if char in name:
-                return False, f"Application name cannot contain '{char}'"
-        if len(name) < 1 or len(name) > 50:
-            return False, "Application name must be 1-50 characters"
-        return True, ""
-
-    def validate_version(self, version: str) -> Tuple[bool, str]:
-        """Validate version string (simple semantic versioning)."""
-        # Basic validation: X.Y.Z format
-        import re
-        if not re.match(r'^\d+\.\d+(\.\d+)?$', version):
-            return False, "Version should be in format: X.Y or X.Y.Z (e.g., 1.0 or 1.0.0)"
-        return True, ""
-
+    
     def validate_password_strength(self, password: str) -> Tuple[bool, str]:
         """Validate password strength for security."""
         if not password:
